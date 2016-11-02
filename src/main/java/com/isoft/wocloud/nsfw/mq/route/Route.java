@@ -25,4 +25,19 @@ public enum Route {
 			return UNDEFINED_KEY;
 		}
 	}
+	
+	public Queue getQueue() {
+		switch (this) {
+		case DOWNLOAD_KEY:
+			return Queue.DOWNLOAD_QUEUE;
+		case THUMBNAIL_KEY:
+			return Queue.THUMBNAIL_QUEUE;
+		case TUPU_KEY:
+			return Queue.TUPU_QUEUE;
+		case DATABASE_KEY:
+			return Queue.DATABASE_QUEUE;
+		default:
+			return Queue.NSFW_QUEUE;
+		}
+	}
 }

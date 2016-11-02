@@ -16,6 +16,7 @@ import com.isoft.wocloud.nsfw.mq.common.MQConfig;
 import com.isoft.wocloud.nsfw.mq.conn.impl.RbConnector;
 import com.isoft.wocloud.nsfw.mq.exchange.Exchange;
 import com.isoft.wocloud.nsfw.mq.host.Host;
+import com.isoft.wocloud.nsfw.mq.module.MessageModule;
 import com.isoft.wocloud.nsfw.mq.queue.Queue;
 import com.isoft.wocloud.nsfw.mq.server.MQServer;
 import com.isoft.wocloud.nsfw.mq.util.MQUtil;
@@ -102,7 +103,7 @@ public class LogicTest {
 	 */
 	@Test public void testMQServer() {
 		MQServer server = MQUtil.getMQServer();
-		MQUtil.init(server, MQConfig.host);
+		MQUtil.init(server, MQConfig.host, MessageModule.COMPLEX);
 	}
 	
 	/**
@@ -137,6 +138,7 @@ public class LogicTest {
 		assertEquals("nsfw-exchange", exchange.getName());
 		assertEquals(true, MQConfig.enableConnRecovery);
 		assertEquals(10000, MQConfig.recoveryInterval);
+		assertEquals("SIMPLE", MQConfig.messageModule.name());
 	}
 	
 	/**

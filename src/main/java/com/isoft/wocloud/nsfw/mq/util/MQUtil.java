@@ -9,6 +9,7 @@ import com.isoft.wocloud.nsfw.mq.common.MQConfig;
 import com.isoft.wocloud.nsfw.mq.exception.BuildeFailedException;
 import com.isoft.wocloud.nsfw.mq.exchange.Exchange;
 import com.isoft.wocloud.nsfw.mq.host.Host;
+import com.isoft.wocloud.nsfw.mq.module.MessageModule;
 import com.isoft.wocloud.nsfw.mq.queue.Queue;
 import com.isoft.wocloud.nsfw.mq.route.Route;
 import com.isoft.wocloud.nsfw.mq.server.Builder;
@@ -46,46 +47,57 @@ public class MQUtil {
 	}
 	
 	/**
-	 * 建立队列、路由器、绑定路由规则
+	 * 初始化消息服务模型
 	 * @param server
 	 * @param host
 	 */
-	public static void init(MQServer server, Host host) {
+	public static void init(MQServer server, Host host, MessageModule messageModule) {
 		boolean durable = true;
 		Exchange exchange = MQConfig.exchange;
-		System.out.println("消息服务器开始初始化...");
 		try {
+			System.out.println("消息服务器开始初始化...");
 			server.connect(host);
-			// 建立队列
-			for (Queue queue : Queue.values()) {
-				Builder queueBuilder = server.getQueueBuilder(queue, durable);
-					try {
-						queueBuilder.build();
-					} catch (BuildeFailedException e) {
-						e.printStackTrace();
-					}
+			buildQueues(server, durable);
+			if (messageModule == MessageModule.COMPLEX) {
+				buildExchange(server, durable, exchange);
+				bindRouting(server, exchange);
 			}
-			System.out.println("队列建立完毕！");
-			
-			// 建立路由器
-			Builder exchagneBuilder = server.getExchangeBuilder(exchange, durable);
-			try {
-				exchagneBuilder.build();
-			} catch (BuildeFailedException e) {
-				e.printStackTrace();
-			}
-			System.out.println("路由器建立完毕！");
-			
-			for (Queue queue : Queue.values()) {
-				// 绑定路由规则
-				server.bind(queue, exchange, Route.getRoute(queue));
-			}
-			System.out.println("绑定路由规则完毕！");
-			
 			server.closed();
+			System.out.println("消息服务器初始化完毕!");
 		} catch (IOException | TimeoutException e) {
 			e.printStackTrace();
 		}
-		System.out.println("消息服务器初始化完毕!...");
+	}
+
+	private static void bindRouting(MQServer server, Exchange exchange) throws IOException {
+		for (Queue queue : Queue.values()) {
+			// 绑定路由规则
+			server.bind(queue, exchange, Route.getRoute(queue));
+		}
+		System.out.println("绑定路由规则完毕！");
+	}
+
+	private static void buildExchange(MQServer server, boolean durable, Exchange exchange) {
+		// 建立路由器
+		Builder exchangeBuilder = server.getExchangeBuilder(exchange, durable);
+		try {
+			exchangeBuilder.build();
+			System.out.println("路由器建立完毕！");
+		} catch (BuildeFailedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void buildQueues(MQServer server, boolean durable) {
+		// 建立队列
+		for (Queue queue : Queue.values()) {
+			Builder queueBuilder = server.getQueueBuilder(queue, durable);
+				try {
+					queueBuilder.build();
+				} catch (BuildeFailedException e) {
+					e.printStackTrace();
+				}
+		}
+		System.out.println("队列建立完毕！");
 	}
 }

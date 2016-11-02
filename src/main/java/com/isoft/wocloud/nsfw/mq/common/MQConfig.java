@@ -5,6 +5,7 @@ import java.util.Properties;
 
 import com.isoft.wocloud.nsfw.mq.exchange.Exchange;
 import com.isoft.wocloud.nsfw.mq.host.Host;
+import com.isoft.wocloud.nsfw.mq.module.MessageModule;
 
 public class MQConfig {
 	
@@ -12,6 +13,7 @@ public class MQConfig {
 	public static Exchange exchange;
 	public static boolean enableConnRecovery;
 	public static int recoveryInterval;
+	public static MessageModule messageModule;
 	
 	static {
 		try {
@@ -22,6 +24,7 @@ public class MQConfig {
 			exchange = configExchange(prop);
 			enableConnRecovery = Boolean.valueOf(prop.getProperty("mq.nsfw.conn.recovery")); 
 			recoveryInterval = Integer.parseInt(prop.getProperty("mq.nsfw.conn.interval"));
+			messageModule = configMessageModule(prop);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -42,5 +45,15 @@ public class MQConfig {
 		String exchangeName = prop.getProperty("mq.nsfw.exchange.name");
 		Exchange exchange = new Exchange(exchangeType, exchangeName);
 		return exchange;
+	}
+	
+	private static MessageModule configMessageModule(Properties prop) {
+		String module = prop.getProperty("mq.nsfw.message.module");
+		for (MessageModule messageModule : MessageModule.values()) {
+			if (messageModule.name().equals(module.toUpperCase())) {
+				return messageModule;
+			}
+		}
+		return MessageModule.SIMPLE;
 	}
 }
