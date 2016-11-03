@@ -61,3 +61,5 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+target/classes/META-INF/maven/com.isoft.nsfw/wocloud.nsfw.mq/pom.properties
+*.properties
